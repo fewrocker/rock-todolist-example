@@ -5,3 +5,10 @@
 #
 #   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
 #   Character.create(name: 'Luke', movie: movies.first)
+
+Task.destroy_all
+Task.create(name: "Investigar", status: true)
+Task.create(name: "Programar", status: false)
+Task.create(name: "Refatorar", status: false)
+puts "Seed complete"
+

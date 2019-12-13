@@ -3,15 +3,14 @@
     <div id="home-page" class="full-page">
 
       <div v-for="task in tasks" class="each-task">
-        <i class="far fa-square task-icon" v-if="!task.status" @click="task.status = true"></i>
-        <i class="far fa-check-square task-icon"  @click="task.status = false" v-else></i>
+        <i class="far fa-square task-icon" v-if="!task.status" @click="updateTask(task.id)"></i>
+        <i class="far fa-check-square task-icon"  @click="updateTask(task.id)" v-else></i>
         <p class="task-name">{{task.name}}</p>
-        <i class="fa fa-trash" @click="deleteTask(task)"></i>
+        <i class="fa fa-trash" @click="deleteTask(task.id)"></i>
       </div>
 
       <input type="text" v-model="newTask" @keyup.enter="createTask()">
       <div class="btn btn-primary" @click="createTask()">Criar</div>
-      <p>{{batata}}</p>
     </div>
   </div>
 </template>
@@ -21,29 +20,33 @@ export default {
   name: "home",
   data: function () {
     return {
-      tasks: [
-        {name: "Investigar", status: true},
-        {name: "Programar", status: false},
-        {name: "Refatorar", status: false},
-      ],
+      tasks: [],
       newTask: "",
-      oi: "lalala"
     }
   },
-  computed: {
-    batata() {
-      return this.oi + "oioi"
-    }
+  async mounted() {
+    const response = await axios.get("/client/tasks");
+    console.log(response)
+    this.tasks = response.data.tasks;
   },
   methods: {
-    createTask() {
-      this.tasks.push({name: this.newTask, status: false});
+    async createTask() {
+      const params = { name: this.newTask, status: false };
+      const response = await axios.post("/client/tasks", params);
+
+      this.tasks.push(response.data.task);
       this.newTask = "";
     },
-    deleteTask(task) {
-      console.log(task)
-      console.log(this.tasks)
-      this.tasks = this.tasks.filter((element) => element !== task )
+    async updateTask(id) {
+      const response = await axios.patch(`/client/tasks/${id}`);
+      const index = this.tasks.findIndex((el) => el.id === id );
+      console.log(response.data)
+      this.$set(this.tasks, index, response.data.task);
+    },
+    async deleteTask(id) {
+      const response = await axios.delete(`/client/tasks/${id}`);
+      const index = this.tasks.findIndex((el) => el.id === id );
+      this.tasks.splice(index, 1);
     }
   }
 }
